@@ -94,6 +94,7 @@ PersistentKeepalive = 25
 - Set `<client-ip-address>` to a unique IP in the same subnet as the server (e.g., `10.2.0.89`).
 - Replace `<server-public-key>` with the server's public key.
 - Replace `<server-public-ip-address>` with the server's public IP.
+- aws dns  `10.2.0.2`
 
 ### Example
 
@@ -101,13 +102,14 @@ PersistentKeepalive = 25
 [Interface]
 PrivateKey = WGeD5jefBgMrQspb4fTgfjMmITc30Uhj5l3OCcBz21Y=
 Address = 10.2.0.89/32
-DNS = 8.8.8.8
+DNS = 10.2.0.2, 1.1.1.1
 
 [Peer]
 PublicKey = f/v0kgEJ88TtgIjZzcryh/RZmoCR3FVN5BHlk2b/f3U=
 AllowedIPs = 0.0.0.0/1, 128.0.0.0/1
 Endpoint = 13.201.36.154:51820
 PersistentKeepalive = 25
+
 ```
 
 > **Note:**  
@@ -124,6 +126,10 @@ Add the client's public key and IP to the server:
 wg set wg0 peer <client-public-key> allowed-ips <client-ip-address>/32
 ```
 
+### Example
+```sh
+sudo wg set wg0 peer HByVG0IIOLHO5qfEa8fyraMcthBtGcWX7p9WjfO+UhI= allowed-ips 10.2.0.90/32
+```
 ---
 
 ## Starting WireGuard
@@ -131,6 +137,8 @@ wg set wg0 peer <client-public-key> allowed-ips <client-ip-address>/32
 Enable the interface on both server and client:
 
 ```sh
+sudo wg-quick save wg0
+sudo wg-quick down wg0
 sudo wg-quick up wg0
 ```
 
@@ -142,9 +150,22 @@ wg
 
 ---
 
+TEST:
+
+```sh
+ping 8.8.8.8
+```
+if it working is fine
+---
 ## Troubleshooting
 
 - Use `ip route show` to determine your server's default network interface (e.g., `ens5`, `eth0`).
+Check status:
+
+```sh
+ip route show
+
+```
 - Ensure `PostUp` and `PostDown` rules use the correct interface.
 - If you can only access the server but not the internet via the tunnel, double-check the interface name in your `MASQUERADE` rules.
 
