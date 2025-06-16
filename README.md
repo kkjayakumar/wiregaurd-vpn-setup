@@ -70,6 +70,52 @@ PrivateKey = SHjRYwNYeXEb4I/wKwmmY9ewZcamNVYzU2uotjRFI0k=
 PublicKey = C6HodTNIjSI11ga1XYR21ayXl/XGsaijofNw0oP/n00=
 AllowedIPs = 10.2.0.89/32
 ```
+Enable the interface on both server and client:
+
+```sh
+chmod 777 .
+sudo wg-quick up wg0
+sudo wg show
+
+```
+
+```sh
+sysctl net.ipv4.ip_forward
+```
+If the output is net.ipv4.ip_forward = 0, it is disabled. You need it to be 1.
+```sh
+sudo sysctl -w net.ipv4.ip_forward=1
+```
+Now, try ping 8.8.8.8 from your client device again. If it works, this was the issue!
+```sh
+```
+This rule "masquerades" traffic from your VPN clients, making it look like it originated from your server's public IP.
+```sh
+sudo iptables -t nat -L POSTROUTING -v -n
+```
+example
+```sh
+Chain POSTROUTING (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+   ...
+    0     0 MASQUERADE  all  --  *      ens5    10.0.229.0/24        0.0.0.0/0
+
+```
+```sh
+sudo iptables -L FORWARD -v -n
+```
+example
+```sh
+Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
+ pkts bytes target     prot opt in     out     source               destination
+   ...
+   84  7056 ACCEPT     all  --  wg0    *       0.0.0.0/0            0.0.0.0/0
+
+```
+```sh
+sudo wg show
+
+```
 
 ---
 
@@ -111,6 +157,7 @@ Endpoint = 13.201.36.154:51820
 PersistentKeepalive = 25
 
 ```
+
 
 > **Note:**  
 > Setting `AllowedIPs = 0.0.0.0/0` routes **all** client traffic through the VPN.  
