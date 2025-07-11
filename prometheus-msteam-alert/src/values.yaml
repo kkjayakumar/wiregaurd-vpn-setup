@@ -1,0 +1,4 @@
+replicaCount: 1
+
+connectors:
+  - teams: "https://*.webhook.office.com/webhookb2/"
